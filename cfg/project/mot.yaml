@@ -1,0 +1,4 @@
+name: training_test_mot
+root_dir: /home/mazen/Projects/pl_jdt
+data_dir: /home/mazen/Datasets/MOT17Det
+output_dir: output

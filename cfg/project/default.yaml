@@ -1,0 +1,4 @@
+name: training_test
+root_dir: /home/mazen/Projects/pl_jdt
+data_dir: data
+output_dir: output
