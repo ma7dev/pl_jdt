@@ -23,7 +23,7 @@ import torchvision
 from PIL import Image
 from tqdm import tqdm
 
-sys.path.insert(0, os.path.abspath('src/obj_det'))
+sys.path.insert(0, os.path.abspath('pl_jdt/obj_det'))
 
 import transforms as T
 import utils
@@ -250,7 +250,7 @@ def evaluate_and_write_result_files(model, data_loader):
     #         gt_dir=osp.join(args.data_root, args.test_mot_dir),
     #         res_dir=output_dir,
     #         eval_mode='train',
-    #         seqmaps_dir='src/MOTChallengeEvalKit/seqmaps')
+    #         seqmaps_dir='pl_jdt/MOTChallengeEvalKit/seqmaps')
 
     #     evaluation_metrics['AP_MOT17Det'] = 0.0
     #     evaluation_metrics['MODA_MOT17Det'] = 0.0

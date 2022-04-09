@@ -7,7 +7,7 @@ import pytorch_lightning as pl
 import torchmetrics
 
 # modules
-from src.models.model import Net
+from pl_jdt.models.model import Net
 # losses = {
 #     'cross_entropy': {
 #         'module': nn.CrossEntropyLoss(),

@@ -17,13 +17,13 @@ import torchvision
 import torchvision.models.detection
 import torchvision.models.detection.mask_rcnn
 
-from src.obj_det.coco_utils import get_coco, get_coco_kp
+from pl_jdt.obj_det.coco_utils import get_coco, get_coco_kp
 
 from group_by_aspect_ratio import GroupedBatchSampler, create_aspect_ratio_groups
-from src.obj_det.engine import train_one_epoch, evaluate
+from pl_jdt.obj_det.engine import train_one_epoch, evaluate
 
-import src.obj_det.utils as utils
-import src.obj_det.transforms as T
+import pl_jdt.obj_det.utils as utils
+import pl_jdt.obj_det.transforms as T
 
 
 def get_dataset(name, image_set, transform, data_path):

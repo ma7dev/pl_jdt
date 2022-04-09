@@ -17,9 +17,9 @@ this_dir = osp.dirname(__file__)
 
 root_path = osp.join(this_dir, '..', '..')
 
-# Add src to PYTHONPATH
-src_path = osp.join(root_path, 'src')
-add_path(src_path)
+# Add pl_jdt to PYTHONPATH
+pl_jdt_path = osp.join(root_path, 'pl_jdt')
+add_path(pl_jdt_path)
 
 # Change paths in config file
 import frcnn

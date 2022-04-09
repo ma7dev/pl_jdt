@@ -11,12 +11,12 @@ ROOT_DIR = None
 with open('cfg/project/default.yaml', 'r') as f: ROOT_DIR = yaml.load(f, Loader=yaml.FullLoader)['root_dir']
 sys.path.insert(0, os.path.abspath(f"{ROOT_DIR}"))
 
-from src.data.datasets.penn_fundan import PennFudanDataset
-from src.utils.references.detection.engine import train_one_epoch, evaluate
-import src.utils.references.detection.utils as utils
-import src.utils.references.detection.transforms as T
-# import src.utils.transforms as T
-from src.models.mask_rcnn import MaskRCNN
+from pl_jdt.data.datasets.penn_fundan import PennFudanDataset
+from pl_jdt.utils.references.detection.engine import train_one_epoch, evaluate
+import pl_jdt.utils.references.detection.utils as utils
+import pl_jdt.utils.references.detection.transforms as T
+# import pl_jdt.utils.transforms as T
+from pl_jdt.models.mask_rcnn import MaskRCNN
 
 # global
 DATA_PATH = f'{ROOT_DIR}/data/PennFudanPed'

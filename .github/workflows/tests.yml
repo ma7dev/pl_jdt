@@ -1,0 +1,61 @@
+name: tests
+
+on:
+  push:
+    branches:
+      - main
+      - dev/*
+
+  schedule:
+    - cron: "0 4 * * *"
+
+jobs:
+  integration:
+    strategy:
+      matrix:
+        python: [3.9]
+        os: [ubuntu-latest]
+        torch: [1.11.0]
+        torchvision: [0.12.0]
+        pytorch_lightning: [1.5.10]
+        device: [cpu]
+
+    runs-on: ${{ matrix.os }}
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python }}
+      TORCH: ${{ matrix.torch }}
+      TORCHVISION: ${{ matrix.torchvision }}
+      PL: ${{ matrix.pytorch_lightning }}
+      DEVICE: ${{ matrix.device }}
+
+    steps:
+      # setup python
+      - name: Set up python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON }}
+      
+      # upgrade pip
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+      
+      # checkout to the repo
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # create env and isntall packages
+      - name: Create environment and isntall packages
+        run: |
+          ./install.sh
+      
+      # run tests
+      - name: Run tests
+        run: |
+          poe pytest
+      
+      # - name: Upload coverage
+      #   uses: codecov/codecov-action@v1.5.0
+      #   with:
+      #     flags: integration
+      #     env_vars: OS,PYTHON,TORCH

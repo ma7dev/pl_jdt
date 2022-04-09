@@ -9,7 +9,7 @@ from tqdm import tqdm
 from pycocotools import mask as coco_mask
 from pycocotools.coco import COCO
 
-import src.obj_det.transforms as T
+import pl_jdt.obj_det.transforms as T
 
 
 class FilterAndRemapCocoCategories(object):

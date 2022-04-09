@@ -2,7 +2,7 @@ import os, random, string
 from datetime import datetime
 
 # pytoch
-import src.utils.transforms as T
+import pl_jdt.utils.transforms as T
 
 # def get_transforms(mode):
 #     if mode == 'train':

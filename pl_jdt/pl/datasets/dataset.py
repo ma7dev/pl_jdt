@@ -15,6 +15,7 @@ class LitDataset(pl.LightningModule):
         self.get_transforms = get_transforms
         self.kwargs = kwargs
         self.init()
+    
     def init(self):
         if self.get_transforms is None:
             def get_transforms(mode):

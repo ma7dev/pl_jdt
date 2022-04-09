@@ -1,6 +1,13 @@
 import os, sys
 import yaml
 
-ROOT_DIR = None
-with open('../cfg/project/default.yaml', 'r') as f: ROOT_DIR = yaml.load(f, Loader=yaml.FullLoader)['root_dir']
-sys.path.insert(0, os.path.abspath(f"{ROOT_DIR}/src"))
+from .fixtures import *
+
+@pytest.fixture
+def set_config():
+    os.environ['HYDRA_FULL_ERROR'] = '1'
+
+@pytest.fixture
+def set_seed():
+    seed = 42
+    pl.seed_everything(seed, workers=True)

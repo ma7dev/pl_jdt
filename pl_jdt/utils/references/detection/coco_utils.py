@@ -9,7 +9,7 @@ import torchvision
 from pycocotools import mask as coco_mask
 from pycocotools.coco import COCO
 
-import src.utils.references.detection.transforms as T
+import pl_jdt.utils.references.detection.transforms as T
 
 
 class FilterAndRemapCocoCategories(object):

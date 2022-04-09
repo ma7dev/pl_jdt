@@ -9,10 +9,10 @@ import os.path as osp
 
 
 sys.path.insert(0, os.path.abspath('/home/mazen/Projects/pl_jdt/tmp/tracking_wo_bnw'))
-from src.obj_det.mot_data import MOTObjDetect
-import src.obj_det.transforms as T
-from src.obj_det.engine import train_one_epoch, evaluate
-import src.obj_det.utils as utils
+from pl_jdt.obj_det.mot_data import MOTObjDetect
+import pl_jdt.obj_det.transforms as T
+from pl_jdt.obj_det.engine import train_one_epoch, evaluate
+import pl_jdt.obj_det.utils as utils
 
 DATA_DIR = '/home/mazen/Datasets/MOT17Det'
 OUTPUT_DIR = "../../output/faster_rcnn_fpn/faster_rcnn_fpn_training_mot_17_split_09"

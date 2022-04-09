@@ -11,13 +11,10 @@ from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger, WandbLogger
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping, ModelSummary, DeviceStatsMonitor, TQDMProgressBar
 
 # modules
-ROOT_DIR = None
-with open('cfg/project/default.yaml', 'r') as f: ROOT_DIR = yaml.load(f, Loader=yaml.FullLoader)['root_dir']
-sys.path.insert(0, os.path.abspath(f"{ROOT_DIR}"))
-from src.pl.modules.det_module import LitModule
-from src.pl.datasets.mot import LitDataset
-import src.utils.utils as utils
-import src.utils.references.detection.transforms as T
+from pl_jdt.pl.modules.det_module import LitModule
+from pl_jdt.pl.datasets.mot import LitDataset
+import pl_jdt.utils.utils as utils
+import pl_jdt.utils.references.detection.transforms as T
 
 # rich
 from rich import pretty, traceback
