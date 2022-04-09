@@ -44,10 +44,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # create env and isntall packages
-      - name: Create environment and isntall packages
+      # create env and install packages
+      - name: Create environment and install packages
         run: |
-          ./install.sh
+          ./dev_install.sh
       
       # run tests
       - name: Run tests
