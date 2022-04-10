@@ -1,0 +1,13 @@
+name: pl_jdt
+channels:
+  - defaults
+  - conda-forge
+  - pytorch
+  - nvidia
+dependencies:
+  - python=3.9
+  - poetry
+  - pytorch
+  - torchvision
+  - pytorch-lightning=1.5.10
+  - torchmetrics=0.7.3

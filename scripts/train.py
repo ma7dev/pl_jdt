@@ -11,12 +11,9 @@ from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger, WandbLogger
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping, ModelSummary, DeviceStatsMonitor
 
 # modules
-ROOT_DIR = None
-with open('cfg/project/default.yaml', 'r') as f: ROOT_DIR = yaml.load(f, Loader=yaml.FullLoader)['root_dir']
-sys.path.insert(0, os.path.abspath(f"{ROOT_DIR}"))
-from src.pl.modules.module import LitModule
-from src.pl.datasets.dataset import LitDataset
-import src.utils.utils as utils
+from pl_jdt.pl.modules.module import LitModule
+from pl_jdt.pl.datasets.dataset import LitDataset
+import pl_jdt.utils.utils as utils
 
 # rich
 from rich import pretty, traceback
@@ -26,7 +23,6 @@ traceback.install(suppress=[
     pl,
 ])
 
-# transforms
 def get_transforms(mode):
     if mode == 'train':
         return transforms.Compose([
@@ -38,48 +34,53 @@ def get_transforms(mode):
             transforms.ToTensor(),
             transforms.Normalize((0.1307,), (0.3081,))
         ])
-@hydra.main(config_path="../cfg", config_name="config")
-def main(cfg : DictConfig) -> None:
+
+def init(cfg, common={}):
     os.environ['HYDRA_FULL_ERROR'] = '1'
-    # print(OmegaConf.to_yaml(cfg))
-    # init
-    project_name = cfg.project.name
-    output_path = f"{cfg.project.root_dir}/{cfg.project.output_dir}"
-    data_path = f"{cfg.project.root_dir}/{cfg.project.data_dir}"
-    exp_name = cfg.exp.name
+    common['project_name'] = cfg.project.name
+    common['output_path'] = f"{cfg.project.root_dir}/{cfg.project.output_dir}"
+    common['data_path'] = f"{cfg.project.root_dir}/{cfg.project.data_dir}"
+    common['exp_name'] = cfg.exp.name
     # exp_path = '{save_dir}/{today}/{curr_time}-{exp_name}-{random_str}'
     # example: ./output/2020-04-24/12-14-test-L1GV1
-    exp_path, run_name = utils.exp(output_path, exp_name)
-
+    common['exp_path'], common['run_name'] = utils.exp(common['output_path'], common['exp_name'])
     # set seed
     seed = cfg.exp.seed if 'seed' in cfg.exp.keys() else 42
     pl.seed_everything(seed, workers=True)
+    return common
 
-    # Dataset
-    dataset_kwargs = {
+def get_dataset_kwargs(cfg):
+    return {
         'batch_size': cfg.exp.train.batch_size if 'batch_size' in cfg.exp.train.keys() else 32,
         'val_batch_size': cfg.exp.val.batch_size if 'val_batch_size' in cfg.exp.val.keys() else cfg.exp.train.batch_size,
         'num_workers': cfg.exp.num_workers if 'num_workers' in cfg.exp.keys() else 4,
     }
-    dataset = LitDataset(data_path, get_transforms, **dataset_kwargs)
+
+def get_dataset(dataset_kwargs, common):
+    dataset = LitDataset(common['data_path'], get_transforms, **dataset_kwargs)
     dataset.prepare_data()
     dataset.setup()
+    return dataset
 
-    # Module
-    module = None; module_kwargs = {}
+def get_module_kwargs(cfg):
+    module_kwargs = {}
     checkpoint_path = cfg.exp.checkpoint_path if 'checkpoint_path' in cfg.exp.keys() else False
     if checkpoint_path:
         module_kwargs.update({
             'checkpoint_path': checkpoint_path,
         })
-        module = LitModule.load_from_checkpoint(**module_kwargs)
     else:
         module_kwargs.update({
             'optim': cfg.exp.train.optim if 'optim' in cfg.exp.train.keys() else 'adam',
         })
-        module = LitModule(**module_kwargs)
+    return module_kwargs
 
-    # Trainer
+def get_module(module_kwargs):
+    if 'checkpoint_path' in module_kwargs.keys():
+        return LitModule.load_from_checkpoint(**module_kwargs)
+    return LitModule(**module_kwargs)
+
+def get_trainer_kwargs(cfg):
     trainer_kwargs = {
         'max_epochs': cfg.exp.max_epochs if 'max_epochs' in cfg.exp.keys() else 10,
         # int: n = check validation set every 1000 training batches
@@ -123,39 +124,42 @@ def main(cfg : DictConfig) -> None:
     #         'devices': cfg.exp.devices if 'devices' in cfg.exp.keys() else [0],
     #         'accelerator': cfg.exp.accelerator if 'accelerator' in cfg.exp.keys() else 'gpu',
     #     })
-    # Loggers
+    return trainer_kwargs
+
+def get_loggers(cfg, common):
     loggers = {}
     enabled = {}
     if 'csv' in cfg.exp.keys() and cfg.exp.csv:
         csv_kwargs = {
-            'save_dir': f"{output_path}/csv_logs",
-            'name': run_name
+            'save_dir': f"{common['output_path']}/csv_logs",
+            'name': common['run_name']
         }
         enabled['csv'] = csv_kwargs
         loggers['csv'] = CSVLogger(**csv_kwargs)
     if 'tb' in cfg.exp.keys() and cfg.exp.tb:
         tb_kwargs = {
-            'save_dir': f'{output_path}/tb_logs',
-            'name': run_name
+            'save_dir': f"{common['output_path']}/tb_logs",
+            'name': common['run_name']
         }
         enabled['tb'] = tb_kwargs
         loggers['tb'] = TensorBoardLogger(**tb_kwargs)
     if 'wandb' in cfg.exp.keys() and cfg.exp.wandb:
         wandb_kwargs = {
-            'project': project_name,
-            'name': run_name,
-            'save_dir': f'{output_path}'
+            'project': common['project_name'],
+            'name': common['run_name'],
+            'save_dir': f"{common['output_path']}"
         }
         enabled['wandb'] = wandb_kwargs
         loggers['wandb'] = WandbLogger(**wandb_kwargs)
     print(f'Enabled loggers:\n{OmegaConf.to_yaml(enabled)}\n\n')
+    return loggers
 
-    # callbacks
+def get_callbacks(cfg, common):
     callbacks = {}
     enabled = {}
     if 'checkpoints' in cfg.exp.keys():
         checkpoints_kwargs = {
-            'dirpath': cfg.exp.checkpoints.dirpath if 'dirpath' in cfg.exp.checkpoints.keys() else f'{exp_path}/ckpts',
+            'dirpath': cfg.exp.checkpoints.dirpath if 'dirpath' in cfg.exp.checkpoints.keys() else f"{common['exp_path']}/ckpts",
             # 'every_n_epochs': cfg.exp.checkpoints.every_n_epochs if 'every_n_epochs' in cfg.exp.checkpoints.keys() else 1,
             'monitor': cfg.exp.checkpoints.monitor if 'monitor' in cfg.exp.checkpoints.keys() else 'val/epoch/loss',
             # 'filename': 'sample-mnist-{epoch:03d}-{val_loss:.2f}',
@@ -164,7 +168,7 @@ def main(cfg : DictConfig) -> None:
         callbacks['checkpoints'] = ModelCheckpoint(**checkpoints_kwargs)
     else:
         checkpoints_kwargs = {
-            'dirpath': f'{exp_path}/ckpts',
+            'dirpath': f"{common['exp_path']}/ckpts",
             'monitor': 'val/epoch/loss',
         }
         enabled['checkpoints'] = checkpoints_kwargs
@@ -186,12 +190,34 @@ def main(cfg : DictConfig) -> None:
         enabled['model_summary'] = model_summary_kwargs
         callbacks['model_summary'] = ModelSummary(**model_summary_kwargs)
     print(f'Enabled callbacks:\n{OmegaConf.to_yaml(enabled)}\n\n')
+    return callbacks
+
+@hydra.main(config_path="../cfg", config_name="config")
+def main(cfg : DictConfig) -> None:
+    # init
+    common = init(cfg)
+
+    # Dataset
+    dataset_kwargs = get_dataset_kwargs(cfg)
+    dataset = get_dataset(dataset_kwargs, common)
+
+    # Module
+    module_kwargs = get_module_kwargs(cfg)
+    module = get_module(module_kwargs)
+
+    # Trainer
+    trainer_kwargs = get_trainer_kwargs(cfg)
+
+    # Loggers
+    loggers = get_loggers(cfg, common)
+    callbacks = get_callbacks(cfg, common)
 
     trainer_kwargs['callbacks'] = [callback for callback in callbacks.keys()]
     trainer_kwargs['logger'] = [logger for logger in loggers.keys()]
     # print(OmegaConf.to_yaml(trainer_kwargs))
     trainer_kwargs['callbacks'] = [callback for callback in callbacks.values()]
     trainer_kwargs['logger'] = [logger for logger in loggers.values()]
+
     # exit()
     trainer = pl.Trainer(**trainer_kwargs)
 

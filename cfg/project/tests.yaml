@@ -1,0 +1,4 @@
+name: training_test
+root_dir: .
+data_dir: data
+output_dir: output

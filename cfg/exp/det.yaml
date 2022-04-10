@@ -24,10 +24,11 @@ train:
       lr: 0.00001
       weight_decay: 0.0005
       momentum: 0.9
-  scheduler: 
+  lr_scheduler: 
     name: step
-    step_size: 10
-    gamma: 0.1
+    params:
+      step_size: 10
+      gamma: 0.1
   warmup: False
 val:
   batch_size: 2
