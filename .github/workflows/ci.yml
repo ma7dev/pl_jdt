@@ -57,7 +57,7 @@ jobs:
           source $CONDA_PATH/etc/profile.d/conda.sh
 
           echo "Running dev_install script..."
-          ./dev_install.sh
+          ./.dev/dev_install.sh
       
       - name: Run tests
         run: |

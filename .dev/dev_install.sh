@@ -4,7 +4,7 @@ CONDA_PATH=$(conda info | grep -i 'base environment' | cut -d ":" -f2 | cut -d "
 source $CONDA_PATH/etc/profile.d/conda.sh
 
 echo "Setting environment..."
-conda env create -f dev_environment.yml
+conda env create -f .dev/dev_environment.yml
 
 echo "Activating environment..."
 conda activate pl_jdt
