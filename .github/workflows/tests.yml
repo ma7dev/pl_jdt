@@ -6,53 +6,48 @@ on:
       - main
       - dev/*
 
-  schedule:
-    - cron: "0 4 * * *"
-
 jobs:
   integration:
-    strategy:
-      matrix:
-        python: [3.9]
-        os: [ubuntu-latest]
-        torch: [1.11.0]
-        torchvision: [0.12.0]
-        pytorch_lightning: [1.5.10]
-        device: [cpu]
-
-    runs-on: ${{ matrix.os }}
-    env:
-      OS: ${{ matrix.os }}
-      PYTHON: ${{ matrix.python }}
-      TORCH: ${{ matrix.torch }}
-      TORCHVISION: ${{ matrix.torchvision }}
-      PL: ${{ matrix.pytorch_lightning }}
-      DEVICE: ${{ matrix.device }}
-
+    runs-on: ubuntu-latest
     steps:
       # setup python
       - name: Set up python
-        uses: actions/setup-python@v2
+        uses: conda-incubator/setup-miniconda@v2
         with:
-          python-version: ${{ env.PYTHON }}
-      
-      # upgrade pip
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
+          auto-activate-base: true
+          auto-update-conda: true
+          python-version: "3.9"
+          activate-environment: true
+          miniconda-version: 'latest'
       
       # checkout to the repo
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: test commands
+        run : |
+          which conda
+          which python
+          python --version
+          conda --version
+      
       # create env and install packages
       - name: Create environment and install packages
         run: |
+          echo "Setting conda init..."
+          CONDA_PATH=$(conda info | grep -i 'base environment' | cut -d ":" -f2 | cut -d " " -f2)
+          source $CONDA_PATH/etc/profile.d/conda.sh
           ./dev_install.sh
       
       # run tests
       - name: Run tests
         run: |
-          poe pytest
+          echo "Setting conda init..."
+          CONDA_PATH=$(conda info | grep -i 'base environment' | cut -d ":" -f2 | cut -d " " -f2)
+          source $CONDA_PATH/etc/profile.d/conda.sh
+          echo "Activating environment..."
+          conda activate pl_jdt
+          python -m pytest tests
       
       # - name: Upload coverage
       #   uses: codecov/codecov-action@v1.5.0
